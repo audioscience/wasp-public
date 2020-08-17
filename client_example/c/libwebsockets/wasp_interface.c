@@ -64,8 +64,8 @@ int wasp_if_connect_to_device(
 		return -1;
 	}
 
-	strncpy(devices[device_index], ipv4_address, WASP_IF_IPV4_ADDRESS_LEN);
-	devices[device_index][WASP_IF_IPV4_ADDRESS_LEN] = '\0';
+	strncpy(devices[device_index], ipv4_address, WASP_IF_IPV4_ADDRESS_LEN-1);
+	devices[device_index][WASP_IF_IPV4_ADDRESS_LEN-1] = '\0';
 
 	/* wait for objects and schemas to be read upon startup of lws_http_client */
 	printf("Connecting to %s and reading objects and schemas - can take several seconds...\n",
@@ -152,15 +152,15 @@ void _wasp_if_msg_init(
 )
 {
 	memset(msg, 0, sizeof(*msg));
-	strncpy(msg->method, method, WASP_IF_METHOD_LEN);
-	msg->method[WASP_IF_METHOD_LEN] = '\0';
-	strncpy(msg->ipv4_address, ipv4_address, WASP_IF_IPV4_ADDRESS_LEN);
-	msg->ipv4_address[WASP_IF_IPV4_ADDRESS_LEN] = '\0';
-	strncpy(msg->path, path, WASP_IF_PATH_LEN);
-	msg->path[WASP_IF_PATH_LEN] = '\0';
+	strncpy(msg->method, method, WASP_IF_METHOD_LEN-1);
+	msg->method[WASP_IF_METHOD_LEN-1] = '\0';
+	strncpy(msg->ipv4_address, ipv4_address, WASP_IF_IPV4_ADDRESS_LEN-1);
+	msg->ipv4_address[WASP_IF_IPV4_ADDRESS_LEN-1] = '\0';
+	strncpy(msg->path, path, WASP_IF_PATH_LEN-1);
+	msg->path[WASP_IF_PATH_LEN-1] = '\0';
 	if (body) {
-		strncpy(msg->body, body, WASP_IF_BODY_LEN);
-		msg->body[WASP_IF_BODY_LEN] = '\0';
+		strncpy(msg->body, body, WASP_IF_BODY_LEN-1);
+		msg->body[WASP_IF_BODY_LEN-1] = '\0';
 	}
 }
 
@@ -240,8 +240,8 @@ void _wasp_if_store_object(
 void _wasp_if_store_single_object(const char *buf)
 {
 	memset(resp_buffer, 0, WASP_IF_RESP_BUF_LEN);
-	strncpy(resp_buffer, buf, WASP_IF_RESP_BUF_LEN);
-	resp_buffer[WASP_IF_RESP_BUF_LEN] = '\0';
+	strncpy(resp_buffer, buf, WASP_IF_RESP_BUF_LEN-1);
+	resp_buffer[WASP_IF_RESP_BUF_LEN-1] = '\0';
 }
 
 int _wasp_if_get_last_err_code(void)
