@@ -1,18 +1,39 @@
 # REMOTE_ASI2900.PY
 #
 # Standalone ASI2900 client for a WASP server.  Works on CPython 3 and
-# MicroPython.  Depends only on the stdlib and wasp.client.WaspClient.
+# MicroPython.  Depends on the stdlib, the sibling module_ids.py, and
+# wasp.client.WaspClient.
 #
 # State comes from the WASP update stream.  This module does not read the
 # device filesystem or run shell commands.  The on-device front panel uses
 # local_asi2900.LocalASI2900, which adds the boot image type, shell IP
 # addresses, secondary MAC, connector names, and the pre-checkpoint snapshot.
 #
-# Run from a directory that contains this file and the vendored wasp package:
+# Run from a directory that contains this file, module_ids.py, and the
+# vendored wasp package:
 #   python3 remote_asi2900.py <host> [port]
 
 import asyncio
 import gc
+import sys
+
+def _load_module_ids():
+	"""Import MODULE_IDS from module_ids.py sitting next to this file.
+
+	Running the example puts this directory on sys.path already.  Importing
+	asi.asi2900.remote_asi2900 does not, and this client must not import the
+	device package to find the file.
+	"""
+	path = __file__
+	slash = path.rfind('/')
+	directory = path[:slash] if slash >= 0 else ''
+	if directory and directory not in sys.path:
+		sys.path.append(directory)
+	import module_ids
+	return module_ids.MODULE_IDS
+
+
+MODULE_IDS = _load_module_ids()
 
 try:
 	import logging
@@ -52,25 +73,23 @@ DISPLAY_STREAM_STATE_ERROR = 3
 OPERATING_MODE_ICECAST = 'icy'
 OPERATING_MODE_DANTE = 'dep'
 
-# WASP block:module.part_number -> numeric module id.  Same values as
-# asi.asi2900.asi1900_module.base.MODULE_IDS, inlined so this file does not
-# import device-local packages.
+# WASP block:module.part_number -> numeric module id.
 _PART_TO_MODULE_ID = {
-	'ASI1931': 0x1931,
-	'ASI1932': 0x1932,
-	'ASI1933': 0x1933,
-	'ASI1941': 0x1941,
-	'ASI1942': 0x1942,
-	'ASI1951': 0x1951,
-	'ASI1952': 0x1952,
-	'ASI1971': 0x1971,
-	'ASI1972': 0x1972,
+	'ASI1931': MODULE_IDS.ASI1931_LINEOUT,
+	'ASI1932': MODULE_IDS.ASI1932_MICLINEIN,
+	'ASI1933': MODULE_IDS.ASI1933_UBMICLINEIN,
+	'ASI1941': MODULE_IDS.ASI1941_AESEBUOUT,
+	'ASI1942': MODULE_IDS.ASI1942_AESEBUIN,
+	'ASI1951': MODULE_IDS.ASI1951_GPIO_8X8,
+	'ASI1952': MODULE_IDS.ASI1952_GPIO_5X5,
+	'ASI1971': MODULE_IDS.ASI1971_TUNER_AMFMWB,
+	'ASI1972': MODULE_IDS.ASI1972_TUNER_AMFMHDDAB,
 }
 
 # GPIO line count for ASI1951 (8) and ASI1952 (5), used until bits_state arrives.
 _GPIO_COUNT_BY_MODULE_ID = {
-	0x1951: 8,
-	0x1952: 5,
+	MODULE_IDS.ASI1951_GPIO_8X8: 8,
+	MODULE_IDS.ASI1952_GPIO_5X5: 5,
 }
 
 _PART_TO_NAME = {
